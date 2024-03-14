@@ -25,14 +25,30 @@ lazy val root = (project in file("."))
     )
   )
   .settings(
-    assembly / assemblyJarName := "tiny-aria2.jar",
-    dockerExposedPorts         := Seq(4447),
-    dockerExposedUdpPorts      := Seq.empty[Int],
-    dockerUsername             := Some("pinkstack"),
-    dockerUpdateLatest         := true,
-    dockerBaseImage            := "azul/zulu-openjdk-alpine:21-latest",
-    packageName                := "tiny-aria2",
-    dockerCommands             := dockerCommands.value.flatMap {
+    assembly / assemblyJarName       := "tiny-aria2.jar",
+    assembly / assemblyMergeStrategy := {
+      case PathList("module-info.class")                        =>
+        MergeStrategy.discard
+      case PathList("META-INF", "jpms.args")                    =>
+        MergeStrategy.discard
+      case PathList("META-INF", "io.netty.versions.properties") =>
+        MergeStrategy.first
+      case PathList("deriving.conf")                            =>
+        MergeStrategy.last
+      case PathList(ps @ _*) if ps.last endsWith ".class"       => MergeStrategy.last
+      case x                                                    =>
+        val old = (assembly / assemblyMergeStrategy).value
+        old(x)
+    }
+  )
+  .settings(
+    dockerExposedPorts    := Seq(4447),
+    dockerExposedUdpPorts := Seq.empty[Int],
+    dockerUsername        := Some("pinkstack"),
+    dockerUpdateLatest    := true,
+    dockerBaseImage       := "azul/zulu-openjdk-alpine:21-latest",
+    packageName           := "tiny-aria2",
+    dockerCommands        := dockerCommands.value.flatMap {
       case add @ Cmd("RUN", args @ _*) if args.contains("id") =>
         List(
           Cmd("LABEL", "maintainer Oto Brglez <otobrglez@gmail.com>"),
