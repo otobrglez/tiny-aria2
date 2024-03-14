@@ -1,9 +1,9 @@
 # tiny-aria2
 
-[tiny-aria2][tiny-aria2] is a small user interface / UI for Aria2.
-It connects to Aria2 via its [jsonrpc](https://aria2.github.io/manual/en/html/aria2c.htm) interface.
+[tiny-aria2][tiny-aria2] is a small and simple user interface / UI for [aria2](https://aria2.github.io/).
 
-[tiny-aria2]: https://github.com/otobrglez/tiny-aria2
+It connects to `aria2` via its [JSON-RPC](https://aria2.github.io/manual/en/html/aria2c.htm) interface.
+
 
 ## Development
 
@@ -22,3 +22,5 @@ docker run -ti --rm \
 ## Author
 
 - [Oto Brglez](https://github.com/otobrglez)
+
+[tiny-aria2]: https://github.com/otobrglez/tiny-aria2
