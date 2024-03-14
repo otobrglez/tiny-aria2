@@ -4,6 +4,10 @@
 
 It connects to `aria2` via its [JSON-RPC](https://aria2.github.io/manual/en/html/aria2c.htm) interface.
 
+## Demo
+
+https://github.com/otobrglez/tiny-aria2/assets/225946/0f65b3b0-4034-4dbb-8301-4459c3ab3512
+
 
 ## Development
 
