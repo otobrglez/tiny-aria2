@@ -16,7 +16,7 @@ docker run -ti --rm \
   -e ARIA2_URI=http://aria2host \
   -e ARIA2_USERNAME=pirate123 \
   -e ARIA2_PASSWORD=pirate123 \
-  docker.io/pinkstack/tiny-aria2:0.0.2
+  docker.io/pinkstack/tiny-aria2:latest
 ```
 
 ## Author
