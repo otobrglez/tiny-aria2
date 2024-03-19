@@ -23,6 +23,7 @@ import org.http4s.multipart.*
 
 final case class WebService private (config: Config, client: Aria2Client) {
   import NewDownloadDecoder.given
+  import MultipartProcessorResult.*
 
   given loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
   private val logger                     = loggerFactory.getLogger
@@ -113,37 +114,34 @@ final case class WebService private (config: Config, client: Aria2Client) {
 
       case req @ POST -> Root / "new-download" =>
         for
-          multipart        <- req.as[Multipart[IO]]
-          _ <- {
-            def fileParts = multipart.parts.collectFirst {
-              case part /* if */ => part
-            }
-            
-            
-            
-            fileParts
-          }
-          response <- Ok("all good")
+          regularForm <- req.as[NewDownload].handleErrorWith(th => logger.warn(th)("invalid form") *> IO.unit)
+          _           <- IO.println(regularForm)
+
+          multipartProcessorResult <- req.as[Multipart[IO]].flatMap(MultipartProcessor.process)
+          response                 <- multipartProcessorResult match
+            case InvalidFileKind(kind) =>
+              Ok(renderError(new RuntimeException(s"Unsupported file kind - $kind")))
+
+            case Base64EncodedFile(file) =>
+              client
+                .addTorrent(file)
+                .flatMap(gid => renderInfo(s"Added new download. GID: $gid"))
+                .handleErrorWith(renderError)
+                .flatMap(Ok(_))
+
+            case EmptyForm() =>
+              Ok("TODO: Empty form but field uri might be set...")
+            /*
+              req
+                .as[NewDownload]
+                .flatMap { newDownload =>
+                  client
+                    .addUri(newDownload.uri)
+                    .flatMap(gid => renderInfo(s"Added new download. GID: $gid"))
+                }
+                .handleErrorWith(renderError)
+                .flatMap(Ok(_)) */
         yield response
-
-      /*
-        req.as[Multipart[IO]] { case parts: Multipart[IO] =>
-          def fileParts = parts.parts.filter(_.filename.isDefined)
-
-          // for file <- fileParts
-          // do IO.println("Hello.")
-          Ok("got it.")
-        }*/
-      /*
-        req
-          .as[NewDownload]
-          .flatMap { newDownload =>
-            client
-              .addUri(newDownload.uri)
-              .flatMap(gid => renderInfo(s"Added new download. GID: $gid"))
-          }
-          .handleErrorWith(renderError)
-          .flatMap(Ok(_)) */
     }
 
   val httpApp: Kleisli[IO, Request[IO], Response[IO]] = routes.orNotFound
@@ -158,6 +156,7 @@ object WebService:
       server     <- BlazeServerBuilder[IO]
         .bindHttp(config.port.toString.toInt, "0.0.0.0")
         .withHttpApp(appService.httpApp)
+        .withBanner(Seq.empty)
         .resource
     /*
       server     <- BlazeServerBuilder
