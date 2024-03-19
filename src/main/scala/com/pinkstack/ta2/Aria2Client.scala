@@ -100,7 +100,8 @@ object Aria2Client:
     for
       client      <- BlazeClientBuilder[IO].withoutSslContext
         .withConnectTimeout(3.seconds)
-        .withRequestTimeout(4.seconds)
+        .withRequestTimeout(3.seconds)
+        .withRetries(2)
         .resource
       aria2client <- Resource.pure(Aria2ClientImpl.make(config, client))
     yield aria2client

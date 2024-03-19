@@ -19,6 +19,7 @@ import org.http4s.Charset.`UTF-8`
 import scalatags.Text
 import cats.data.Validated.*
 import cats.syntax.all.*
+import org.http4s.multipart.*
 
 final case class WebService private (config: Config, client: Aria2Client) {
   import NewDownloadDecoder.given
@@ -111,6 +112,29 @@ final case class WebService private (config: Config, client: Aria2Client) {
         yield response
 
       case req @ POST -> Root / "new-download" =>
+        for
+          multipart        <- req.as[Multipart[IO]]
+          _ <- {
+            def fileParts = multipart.parts.collectFirst {
+              case part /* if */ => part
+            }
+            
+            
+            
+            fileParts
+          }
+          response <- Ok("all good")
+        yield response
+
+      /*
+        req.as[Multipart[IO]] { case parts: Multipart[IO] =>
+          def fileParts = parts.parts.filter(_.filename.isDefined)
+
+          // for file <- fileParts
+          // do IO.println("Hello.")
+          Ok("got it.")
+        }*/
+      /*
         req
           .as[NewDownload]
           .flatMap { newDownload =>
@@ -119,7 +143,7 @@ final case class WebService private (config: Config, client: Aria2Client) {
               .flatMap(gid => renderInfo(s"Added new download. GID: $gid"))
           }
           .handleErrorWith(renderError)
-          .flatMap(Ok(_))
+          .flatMap(Ok(_)) */
     }
 
   val httpApp: Kleisli[IO, Request[IO], Response[IO]] = routes.orNotFound
