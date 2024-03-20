@@ -43,7 +43,7 @@ object MultipartNewDownload:
         part.headers.get(CIString.apply("Content-Type")) match {
           case Some(NonEmptyList(Header.Raw(_, "application/x-bittorrent"), _)) => parseAsTorrent(fieldName, part)
           case Some(NonEmptyList(Header.Raw(_, "application/octet-stream"), _)) => IO.pure(UnknownFileType(fieldName))
-          case None                                                             => parseAsString(fieldName, part)
+          case _                                                                => parseAsString(fieldName, part)
         }
       }
     }.sequence
