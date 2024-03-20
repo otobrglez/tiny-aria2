@@ -20,6 +20,7 @@ object Layout:
       |.header .logo .tiny { font-weight: 700; }
       |.header { line-height: 16pt; margin-bottom: 30px }
       |.header a { margin-right: 10px; }
+      |.error { color: red; }
       |.downloads { display:block; clear:both; float:none; }
       |.downloads .download { display: block; clear: both; float:none; position: relative; margin-bottom: 10px; }
       |.downloads .download .tools a { margin-right: 5px; color: #666; font-size:small; }
@@ -40,6 +41,8 @@ object Layout:
       html(
         head(
           title(rawTitle),
+          meta(charset:="UTF8"),
+          meta(name:="viewport", content:="width=device-width, initial-scale=1"),
           styleTag(cssStyle)
         ),
         body(
@@ -103,7 +106,7 @@ object Layout:
         ),
         div(
           cls        := "input-wrap",
-          label(span("Torrent file"), input(`type` := "file", name := "file"))
+          label(span("Torrent file"), input(`type` := "file", name := "file", accept:=".torrent,application/x-bittorrent"))
         ),
         br(),
         div(cls      := "input-wrap", input(`type` := "submit", value := "Add URI / Magnet")),
