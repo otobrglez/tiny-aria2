@@ -50,5 +50,4 @@ object MultipartProcessor {
     pom.flatMap { v =>
       IO.fromOption(v.collectFirst { case Some(v) => v })(new RuntimeException("Failed parsing payload."))
     }
-
 }
