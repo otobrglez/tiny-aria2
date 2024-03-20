@@ -19,9 +19,11 @@ import org.http4s.Charset.`UTF-8`
 import scalatags.Text
 import cats.data.Validated.*
 import cats.syntax.all.*
+import org.http4s.multipart.*
 
 final case class WebService private (config: Config, client: Aria2Client) {
   import NewDownloadDecoder.given
+  import MultipartProcessorResult.*
 
   given loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
   private val logger                     = loggerFactory.getLogger
@@ -111,15 +113,35 @@ final case class WebService private (config: Config, client: Aria2Client) {
         yield response
 
       case req @ POST -> Root / "new-download" =>
-        req
-          .as[NewDownload]
-          .flatMap { newDownload =>
-            client
-              .addUri(newDownload.uri)
-              .flatMap(gid => renderInfo(s"Added new download. GID: $gid"))
-          }
-          .handleErrorWith(renderError)
-          .flatMap(Ok(_))
+        for
+          regularForm <- req.as[NewDownload].handleErrorWith(th => logger.warn(th)("invalid form") *> IO.unit)
+          _           <- IO.println(regularForm)
+
+          multipartProcessorResult <- req.as[Multipart[IO]].flatMap(MultipartProcessor.process)
+          response                 <- multipartProcessorResult match
+            case InvalidFileKind(kind) =>
+              Ok(renderError(new RuntimeException(s"Unsupported file kind - $kind")))
+
+            case Base64EncodedFile(file) =>
+              client
+                .addTorrent(file)
+                .flatMap(gid => renderInfo(s"Added new download. GID: $gid"))
+                .handleErrorWith(renderError)
+                .flatMap(Ok(_))
+
+            case EmptyForm() =>
+              Ok("TODO: Empty form but field uri might be set...")
+            /*
+              req
+                .as[NewDownload]
+                .flatMap { newDownload =>
+                  client
+                    .addUri(newDownload.uri)
+                    .flatMap(gid => renderInfo(s"Added new download. GID: $gid"))
+                }
+                .handleErrorWith(renderError)
+                .flatMap(Ok(_)) */
+        yield response
     }
 
   val httpApp: Kleisli[IO, Request[IO], Response[IO]] = routes.orNotFound
@@ -134,6 +156,7 @@ object WebService:
       server     <- BlazeServerBuilder[IO]
         .bindHttp(config.port.toString.toInt, "0.0.0.0")
         .withHttpApp(appService.httpApp)
+        .withBanner(Seq.empty)
         .resource
     /*
       server     <- BlazeServerBuilder

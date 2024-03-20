@@ -26,6 +26,9 @@ object Layout:
       |.download .raw-title .progress { margin-left: 15px; color: #333 }
       |.download-status .fields .field { display:block; float: none; clear: both; position: relative; margin-bottom: 10px }
       |.download-status .fields .name { font-weight:bold }
+      |.new-download input { min-width:200px; }
+      |.new-download span { margin-right: 10px }
+      |.new-download .input-wrap { margin-bottom: 10px }
       |""".stripMargin
 
   def layout[T <: String](
@@ -91,11 +94,16 @@ object Layout:
     div(
       cls := "new-download",
       form(
-        action := "/new-download",
-        method := "post",
+        action  := "/new-download",
+        method  := "post",
+        enctype := "multipart/form-data",
         div(
           cls        := "input-wrap",
-          label("URI or Magnet", input(`type` := "text", name := "uri", value := maybeUri.getOrElse("")))
+          label(span("URI or Magnet"), input(`type` := "text", name := "uri", value := maybeUri.getOrElse("")))
+        ),
+        div(
+          cls        := "input-wrap",
+          label(span("Torrent file"), input(`type` := "file", name := "file"))
         ),
         br(),
         div(cls      := "input-wrap", input(`type` := "submit", value := "Add URI / Magnet")),

@@ -22,6 +22,8 @@ trait Aria2Client {
   def tellStatus(gid: GID): IO[Download]
 
   def addUri(uri: String): IO[GID]
+  def addTorrent(file: String): IO[GID]
+
   def remove(gid: GID): IO[GID]
   def removeDownloadResult(gid: GID): IO[GID]
 
@@ -84,6 +86,9 @@ final class Aria2ClientImpl private (
   override def addUri(uri: GID): IO[GID] =
     defineRPC[GID]("aria2.addUri", Json.arr(Json.fromString(uri)))
 
+  override def addTorrent(file: GID): IO[GID] =
+    defineRPC[GID]("aria2.addTorrent", Json.fromString(file))
+
   override def remove(gid: GID): IO[GID] =
     defineRPC[GID]("aria2.remove", Json.fromString(gid))
 
@@ -100,7 +105,8 @@ object Aria2Client:
     for
       client      <- BlazeClientBuilder[IO].withoutSslContext
         .withConnectTimeout(3.seconds)
-        .withRequestTimeout(4.seconds)
+        .withRequestTimeout(3.seconds)
+        .withRetries(2)
         .resource
       aria2client <- Resource.pure(Aria2ClientImpl.make(config, client))
     yield aria2client
