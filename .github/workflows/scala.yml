@@ -36,7 +36,7 @@ jobs:
 
     - name: Log into Docker Hub
       run: |
-        echo $DOCKER_HUB_SECRET | docker login -u otobrglez
+        echo $DOCKER_HUB_SECRET | docker login -u otobrglez --password-stdin
 
     - name: Extract Docker metadata
       id: meta
