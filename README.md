@@ -4,6 +4,9 @@
 
 It connects to `aria2` via its [JSON-RPC](https://aria2.github.io/manual/en/html/aria2c.htm) interface.
 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/otobrglez/tiny-aria2/scala.yml)
+![Docker Pulls](https://img.shields.io/docker/pulls/pinkstack/tiny-aria2)
+
 ## Demo
 
 https://github.com/otobrglez/tiny-aria2/assets/225946/0f65b3b0-4034-4dbb-8301-4459c3ab3512
