@@ -15,6 +15,14 @@ https://github.com/otobrglez/tiny-aria2/assets/225946/0f65b3b0-4034-4dbb-8301-44
 - ```ARIA2_USERNAME``` - `aria2` username
 - ```ARIA2_PASSWORD``` - `aria2` password
 
+## Docker images
+
+We publish fresh Docker images to Docker Registry at [pinkstack/tiny-aria2](https://hub.docker.com/r/pinkstack/tiny-aria2)
+
+```bash
+docker pull pinkstack/tiny-aria2
+```
+
 ## Development
 
 To build and run a Docker Image:
