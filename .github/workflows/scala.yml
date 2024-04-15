@@ -9,6 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DOCKER_HUB_SECRET: ${{ secrets.DOCKER_HUB_SECRET }}
 
 jobs:
   build:
@@ -35,7 +36,8 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Log into Docker Hub
-      run: echo $DOCKER_HUB_SECRET | docker login --username otobrglez --password-stdin
+      run: |
+        echo $DOCKER_HUB_SECRET | docker login --username otobrglez --password-stdin
 
     - name: Extract Docker metadata
       id: meta
